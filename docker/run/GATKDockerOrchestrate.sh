@@ -12,7 +12,7 @@ IN_FILES=/fastq/chr21_1.fq.gz,/fastq/chr21_2.fq.gz
 
 REFERENCE_FOLDER=/reference/hg19-ucsc/
 KNOWN_SITES=/ngs/dbsnp1.3.8/dbsnp_138.hg19.vcf,/ngs/mills_and_1000G-hg19/Mills_and_1000G_gold_standard.indels.hg19.vcf
-OUT_FOLDER=/NGS-SparkGATK/docker/run/output/
+OUT_FOLDER=/output/
 GATK_PATH_3_8=/GenomeAnalysisTK_v3.8-0-ge9d806836.jar
 
 spark_masterID=`sudo docker container ls | awk '/spark-master/ {print $1}'`

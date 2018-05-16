@@ -1,44 +1,53 @@
-version: '3' 
+version: '3'
 services:
   namenode:
-    image: bde2020/hadoop-namenode:1.1.0-hadoop2.8-java8
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
     networks:
-      - core
+      - workbench
     volumes:
       - namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
-      - ./hadoop-swarm.env
+      - ./hadoop.env
     deploy:
       mode: replicated
       replicas: 1
       restart_policy:
         condition: on-failure
+      labels:
+        traefik.docker.network: workbench
+        traefik.port: 50070
     ports:
-      - 50070:50070
+      - 8334:50070
     volumes:
       - /data0/reference/hg19-ucsc/:/reference/hg19-ucsc/
-      - ../run/output/:/output
+      - /data0/output/:/output/
       - /data/ngs/:/ngs/
-
   datanode:
-    image: bde2020/hadoop-datanode:1.1.0-hadoop2.8-java8
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     networks:
-      - core
+      - workbench
     volumes:
       - datanode:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070"
+#    depends_on:
+ #     - namenode
     env_file:
-      - ./hadoop-swarm.env
+      - ./hadoop.env
     deploy:
       mode: global
       restart_policy:
         condition: on-failure
+    labels:
+      traefik.docker.network: workbench
+      traefik.port: 50075
 
 volumes:
   datanode:
   namenode:
 
 networks:
-  core:
+  workbench:
     external: true
