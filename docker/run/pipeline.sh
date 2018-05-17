@@ -10,21 +10,21 @@ dir_callref=CALLSETREFINEMENT/
 SPARK_MASTER_HOST=`hostname`
 
 : <<'COMMENT'
-$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --input hdfs://namenode:8020/PFC_0028_SW_CGTACG_R_fastqtosam.bam \
+$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --input hdfs://namenode:8020/PREPROCESSING/PFC_0028_SW_CGTACG_R_fastqtosam.bam \
 --reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit --bwa-mem-index-image /reference_image/ucsc.hg19.fasta.img \
 --disable-sequence-dictionary-validation true --output hdfs://namenode:8020/PFC_0028_SW_CGTACG_R_dedup_reads.bam \
 -- --spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 --driver-memory 30g --executor-cores 4 --executor-memory 15g
-
 COMMENT
 
-: <<'COMMENT'
+
 #################################################################
 #   BwaAndMarkDuplicatesPipelineSpark
+
 for ubam in $OUT_FOLDER$dir_prepro*_fastqtosam.bam
 do
 	ubam=${ubam##*/}	#getting only the file name without path
 	output="${ubam/_fastqtosam.bam/'_dedup_reads.bam'}"
-
+        echo $output
 	$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --bam-partition-size 4000000 \
 	--input hdfs://namenode:8020/$dir_prepro$ubam \
 	--reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit \
@@ -34,7 +34,7 @@ do
 	--spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 \
 	--driver-memory 15g --executor-cores 2 --executor-memory 8g
 done
-
+: <<'COMMENT'
 COMMENT
 
 
@@ -72,6 +72,8 @@ do
 done
 COMMENT
 
+
+: <<'COMMENT'
 #################################################################
 #   HaplotypeCallerSpark
 for ubam in $OUT_FOLDER$dir_prepro*_fastqtosam.bam
@@ -90,6 +92,7 @@ do
 	--driver-memory 30g --executor-cores 2 --executor-memory 10g
 
 done
+COMMENT
 
 : <<'COMMENT'
 #################################
