@@ -1,7 +1,7 @@
 version: '3'
 services:
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    image: atahualpa/hadoop-namenode:hadoop2.8.4-java8
     networks:
       - workbench
     volumes:
@@ -24,8 +24,10 @@ services:
       - /data0/reference/hg19-ucsc/:/reference/hg19-ucsc/
       - /data0/output/:/output/
       - /data/ngs/:/ngs/
+      - /results/gRCh37/75/:/reference/GRCh37/
+      - /results/gRCh37/ngs/:/ngs/b37/
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    image: atahualpa/hadoop_datanode:hadoop2.8.4-java8
     networks:
       - workbench
     volumes:

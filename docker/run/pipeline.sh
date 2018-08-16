@@ -10,38 +10,43 @@ dir_callref=CALLSETREFINEMENT/
 SPARK_MASTER_HOST=`hostname`
 
 : <<'COMMENT'
-$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --input hdfs://namenode:8020/PREPROCESSING/PFC_0028_SW_CGTACG_R_fastqtosam.bam \
+$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --input hdfs://namenode:8020/PFC_0028_SW_CGTACG_R_fastqtosam.bam \
 --reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit --bwa-mem-index-image /reference_image/ucsc.hg19.fasta.img \
 --disable-sequence-dictionary-validation true --output hdfs://namenode:8020/PFC_0028_SW_CGTACG_R_dedup_reads.bam \
 -- --spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 --driver-memory 30g --executor-cores 4 --executor-memory 15g
-COMMENT
 
+COMMENT
 
 #################################################################
 #   BwaAndMarkDuplicatesPipelineSpark
-
 for ubam in $OUT_FOLDER$dir_prepro*_fastqtosam.bam
 do
 	ubam=${ubam##*/}	#getting only the file name without path
 	output="${ubam/_fastqtosam.bam/'_dedup_reads.bam'}"
-        echo $output
+
 	$GATK_PATH BwaAndMarkDuplicatesPipelineSpark --bam-partition-size 4000000 \
 	--input hdfs://namenode:8020/$dir_prepro$ubam \
 	--reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit \
 	--bwa-mem-index-image /reference_image/ucsc.hg19.fasta.img \
-	--disable-sequence-dictionary-validation true \
 	--output hdfs://namenode:8020/$dir_prepro$output -- \
 	--spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 \
-	--driver-memory 15g --executor-cores 2 --executor-memory 8g
+	--driver-memory 20g --executor-cores 5 --executor-memory 13g
 done
+
+: <<'COMMENT'
+--reference hdfs://namenode:8020/GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.2bit \
+--bwa-mem-index-image /reference_image/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.img \
+
+--disable-sequence-dictionary-validation true \
+COMMENT
+
 : <<'COMMENT'
 COMMENT
 
-
-#30 4 15
-#--num-executors 7 
-
 : <<'COMMENT'
+#30 4 15
+#--num-executors 7
+
 #################################################################
 #   BQSRPipelineSpark
 #create knownsites field
@@ -53,6 +58,7 @@ do
    known="$known $k "
 done
 
+COMMENT
 
 for ubam in $OUT_FOLDER$dir_prepro*_fastqtosam.bam
 do
@@ -66,14 +72,12 @@ do
 	--reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit	\
 	--output hdfs://namenode:8020/$dir_prepro$output			\
 	--disable-sequence-dictionary-validation true				\
-	$known -- \
+        --known-sites  hdfs://namenode:8020/known_sites/dbsnp_138.hg19.vcf \
+        --known-sites  hdfs://namenode:8020/known_sites/Mills_and_1000G_gold_standard.indels.hg19.vcf -- \
 	--spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 \
-	--driver-memory 10g --executor-cores 2 --executor-memory 8g
+	--driver-memory 20g --executor-cores 5 --executor-memory 18g
 done
-COMMENT
 
-
-: <<'COMMENT'
 #################################################################
 #   HaplotypeCallerSpark
 for ubam in $OUT_FOLDER$dir_prepro*_fastqtosam.bam
@@ -86,12 +90,15 @@ do
 	$GATK_PATH HaplotypeCallerSpark							\
 	--input hdfs://namenode:8020/$dir_prepro$ubam			\
 	--reference hdfs://namenode:8020/hg19-ucsc/ucsc.hg19.2bit 		\
-	--output $OUT_FOLDER$dir_prepro$output		\
+	--output hdfs://namenode:8020$OUT_FOLDER$dir_prepro$output		\
 	--emit-ref-confidence GVCF -- \
 	--spark-runner SPARK --spark-master spark://$SPARK_MASTER_HOST:7077 \
-	--driver-memory 30g --executor-cores 2 --executor-memory 10g
+	--driver-memory 20g --executor-cores 5 --executor-memory 10g
 
 done
+
+
+: <<'COMMENT'
 COMMENT
 
 : <<'COMMENT'

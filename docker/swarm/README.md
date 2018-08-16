@@ -1,4 +1,3 @@
-(credits to: https://github.com/big-data-europe/docker-hadoop-spark-workbench)
 # Running Hadoop and Spark in Swarm cluster
 
 
@@ -15,19 +14,7 @@ sudo docker network create -d overlay --attachable workbench
 
 Create traefik service:
 ```
-sudo docker service create \
-    --name traefik \
-    --constraint=node.role==manager \
-    --publish 80:80 \
-    --publish 8080:8080 \
-    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-    --network workbench \
-    traefik:v1.1.0 \
-    --docker \
-    --docker.swarmmode \
-    --docker.domain=traefik \
-    --docker.watch \
-    --web
+sudo docker service create --name traefik --constraint=node.role==manager --publish 80:80 --publish 8080:8080 --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network workbench traefik:v1.1.0 --docker --docker.swarmmode --docker.domain=traefik --docker.watch --web
 ```
 
 

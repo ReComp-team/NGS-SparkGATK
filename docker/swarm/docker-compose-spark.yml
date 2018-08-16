@@ -1,7 +1,7 @@
 version: '3'
 services:
   spark-master:
-    image: atahualpa/spark-master:gatk4.1.1
+    image: atahualpa/spark-master-gatk4.x:4.0.x
     networks:
       - workbench
     deploy:
@@ -23,10 +23,12 @@ services:
       - /data0/reference/hg19-ucsc/:/reference/hg19-ucsc/
       - /data0/fastq/:/fastq/
       - /data0/NGS-SparkGATK/NGS-SparkGATK/:/NGS-SparkGATK/
-      - /data/ngs/:/ngs/
       - /data0/output/:/output/
+      - /data/ngs/:/ngs/
+      - /results/gRCh37/75/:/reference/GRCh37/
+      - /results/gRCh37/ngs/:/ngs/b37/
   spark-worker:
-    image: bde2020/spark-worker:2.2.0-hadoop2.8-hive-java8
+    image: atahualpa/spark-worker:spark2.3.1-hadoop2.8.4
     networks:
       - workbench
     environment:
@@ -38,14 +40,14 @@ services:
       labels:
         traefik.docker.network: workbench
         traefik.port: 8081
-
     env_file:
       - ./hadoop.env
     volumes:
       - reference-image:/reference_image
 
   reference:
-    image: vzzarr/reference:hg19_img
+   # image: vzzarr/reference:hg19_img
+    image: atahualpa/reference:hg19b37
     networks:
       - workbench
     deploy:
